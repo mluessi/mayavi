@@ -21,7 +21,7 @@ from mayavi.core.module_manager import ModuleManager
 from tvtk.api import tvtk
 
 import tools
-from engine_manager import get_engine
+from engine_manager import get_engine, find_figure_engine
 
 def get_obj(obj, components):
     """ Get the target object for the specified components. """
@@ -114,16 +114,28 @@ class PipeFactory(HasPrivateTraits):
         # We are not passing the traits to the parent class
         super(PipeFactory, self).__init__()
         # Try to find the right engine and scene to work with
-        ancester = parent
-        while hasattr(ancester, 'parent'):
-            ancester = getattr(ancester, 'parent')
-            if isinstance(ancester, Scene):
-                self._scene = ancester
-                self._engine = ancester.parent
-                break
-        else:
-            if self.figure is not None:
-                self._scene = self.figure
+        self._engine = None
+        if 'figure' in kwargs:
+            figure = kwargs['figure']
+            print figure  #XXX remove
+            #assert isinstance(self.figure, (Scene, None))
+            try:
+                self._engine = find_figure_engine(figure)
+                print self._engine
+                self._scene = figure
+                self.figure = figure
+            except TypeError:
+                # the engine was not found
+                print 'engine not found'  #XXX remove
+                pass
+        if self._engine is None:
+            ancester = parent
+            while hasattr(ancester, 'parent'):
+                ancester = getattr(ancester, 'parent')
+                if isinstance(ancester, Scene):
+                    self._scene = ancester
+                    self._engine = ancester.parent
+                    break
             else:
                 self._scene = tools.gcf()
                 self._engine = get_engine()

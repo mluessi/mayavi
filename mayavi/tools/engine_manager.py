@@ -208,5 +208,7 @@ get_null_engine = engine_manager.get_null_engine
 
 set_engine = engine_manager.set_engine
 
+find_figure_engine = engine_manager.find_figure_engine
+
 show_pipeline = engine_manager.show_engine
 
